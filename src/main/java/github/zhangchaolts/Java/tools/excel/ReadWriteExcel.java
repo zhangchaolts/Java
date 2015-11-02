@@ -29,7 +29,7 @@ public class ReadWriteExcel {
 			for (int c = 0; c < allCol; c++) {
 				if (sheet.getCell(c, r).getContents() != "") {
 					System.out.print(sheet.getCell(c, r).getContents() + ",");
-					ws.addCell(new Label(r, c, sheet.getCell(c, r).getContents()));//���еߵ�
+					ws.addCell(new Label(r, c, sheet.getCell(c, r).getContents()));
 				}
 			}
 			System.out.println();
