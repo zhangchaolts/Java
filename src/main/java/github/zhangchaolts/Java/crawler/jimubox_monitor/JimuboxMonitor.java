@@ -32,8 +32,8 @@ public class JimuboxMonitor {
 	public static void main(String[] args) throws Exception {
 
 		double money_threshold = 5000;
-		double rate_threshold = 11.0;
-		double day_threshold = 80;
+		double rate_threshold = 9.0;
+		double day_threshold = 60;
 		
 		if(args.length == 3) {
 			money_threshold = Double.valueOf(args[0]);
