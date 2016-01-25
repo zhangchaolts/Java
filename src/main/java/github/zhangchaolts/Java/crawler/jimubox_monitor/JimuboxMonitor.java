@@ -47,7 +47,8 @@ public class JimuboxMonitor {
 
 		while (true) {
 
-			HttpGet httpgets = new HttpGet("http://www.jimubox.com/CreditAssign/List");
+			//HttpGet httpgets = new HttpGet("http://www.jimubox.com/CreditAssign/List");
+			HttpGet httpgets = new HttpGet("https://box.jimu.com/CreditAssign/List?repaymentCalcType=2&&flag=close");
 			HttpResponse response = httpclient.execute(httpgets);
 			HttpEntity entity = response.getEntity();
 			String buf = EntityUtils.toString(entity);
