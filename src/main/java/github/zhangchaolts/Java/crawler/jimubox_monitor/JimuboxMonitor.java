@@ -32,7 +32,7 @@ public class JimuboxMonitor {
 	public static void main(String[] args) throws Exception {
 
 		double money_threshold = 5000;
-		double rate_threshold = 9.0;
+		double rate_threshold = 9.53;
 		double day_threshold = 60;
 		
 		if(args.length == 3) {
@@ -47,25 +47,35 @@ public class JimuboxMonitor {
 
 		while (true) {
 
-			//HttpGet httpgets = new HttpGet("http://www.jimubox.com/CreditAssign/List");
-			HttpGet httpgets = new HttpGet("https://box.jimu.com/CreditAssign/List?repaymentCalcType=2&&flag=close");
+			HttpGet httpgets = new HttpGet("https://box.jimu.com/CreditAssign/List?amount=5&repaymentCalcType=2&orderIndex=1");
 			HttpResponse response = httpclient.execute(httpgets);
 			HttpEntity entity = response.getEntity();
 			String buf = EntityUtils.toString(entity);
 			//System.out.println(buf);
 
-			while (buf.indexOf("\"invest-item-title\"") != -1) {
-				buf = buf.substring(buf.indexOf("\"invest-item-title\""));
+			while (buf.indexOf("\"invest-item-title\"") != -1) {	// start label
+				buf = buf.substring(buf.indexOf("\"invest-item-title\""));	// start label
 				// System.out.println(buf);
 
-				String item_buf = buf.substring(0, buf.indexOf("\"btn btn-primary\""));
+				if(buf.indexOf("class=\"span3\"") == -1) {
+					break;
+				}
+				String item_buf = buf.substring(0, buf.indexOf("class=\"span3\""));	// end label
 				// System.out.println(item_buf);
 
-				String project_current_money = "";
-				String project_sum_money = "";
-				String gift_rate = "";
-				String orignal_rate = "";
-				String left_days = "";
+				String gift_rate = "0";
+				Pattern p0 = Pattern.compile("’€»√±»¿˝\\(%\\)£∫(.*)</div>");
+				Matcher m0 = p0.matcher(item_buf);
+				if (m0.find()) {
+					gift_rate = m0.group(1);
+					//System.out.println(gift_rate);
+				}
+				
+				
+				String project_current_money = "0";
+				String project_sum_money = "0";
+				String orignal_rate = "0";
+				String left_days = "0";
 
 				if (item_buf.indexOf("\"project-info\"") != -1) {
 					//System.out.println("has1");
@@ -74,8 +84,8 @@ public class JimuboxMonitor {
 					//System.out.println("part_str:\n" + part_str);
 					
 					String line_str1 = part_str.substring(part_str.indexOf("decimal"));
-					line_str1 = line_str1.substring(0, line_str1.indexOf("span"));
-					//System.out.println("line_str1:\n" + line_str1);
+					line_str1 = line_str1.substring(0, line_str1.indexOf("span>"));
+					//System.out.println("line_str1:\n" + line_str1);	
 					
 					Pattern p1 = Pattern.compile(">(.*)<");
 					Matcher m1 = p1.matcher(line_str1);
@@ -84,10 +94,10 @@ public class JimuboxMonitor {
 						//System.out.println(project_current_money);
 					}
 					
-					part_str = part_str.substring(part_str.indexOf("</span>"));
+					part_str = part_str.substring(part_str.indexOf("<span>/</span>"));
 					
 					String line_str2 = part_str.substring(part_str.indexOf("decimal"));
-					line_str2 = line_str2.substring(0, line_str2.indexOf("span"));
+					line_str2 = line_str2.substring(0, line_str2.indexOf("span>"));
 					//System.out.println("line_str2:\n" + line_str2);
 					
 					Pattern p2 = Pattern.compile(">(.*)<");
@@ -106,33 +116,20 @@ public class JimuboxMonitor {
 					//System.out.println(part_str);
 
 					String line_str1 = part_str.substring(part_str.indexOf("invest-item-profit"));
-					line_str1 = line_str1.substring(0, line_str1.indexOf("span"));
+					line_str1 = line_str1.substring(0, line_str1.indexOf("span>"));
 					//System.out.println("line_str1:\n" + line_str1);
 					
 					Pattern p1 = Pattern.compile("(.*)<");
 					Matcher m1 = p1.matcher(line_str1);
 					if (m1.find()) {
-						gift_rate = m1.group(1).trim();
-						//System.out.println(gift_rate);
-					}
-					
-					part_str = part_str.substring(part_str.indexOf("split") + "split".length());
-					
-					String line_str2 = part_str.substring(part_str.indexOf("invest-item-profit"));
-					line_str2 = line_str2.substring(0, line_str2.indexOf("span"));
-					//System.out.println("line_str2:\n" + line_str2);
-					
-					Pattern p2 = Pattern.compile("(.*)<");
-					Matcher m2 = p2.matcher(line_str2);
-					if (m2.find()) {
-						orignal_rate = m2.group(1).trim();
+						orignal_rate = m1.group(1).trim();
 						//System.out.println(orignal_rate);
 					}
 					
 					part_str = part_str.substring(part_str.indexOf("split") + "split".length());
 					
 					String line_str3 = part_str.substring(part_str.indexOf("invest-item-profit"));
-					line_str3 = line_str3.substring(0, line_str3.indexOf("span"));
+					line_str3 = line_str3.substring(0, line_str3.indexOf("span>"));
 					//System.out.println("line_str3:\n" + line_str3);
 					
 					Pattern p3 = Pattern.compile("(.*)<");
@@ -164,7 +161,7 @@ public class JimuboxMonitor {
 					}
 				}
 
-				buf = buf.substring(buf.indexOf("\"btn btn-primary\""));
+				buf = buf.substring(buf.indexOf("class=\"span3\""));	//end label
 			}
 			
 			try {
